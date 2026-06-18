@@ -1,4 +1,4 @@
-namespace AspNetProject;
+namespace AspNetProject.Models;
 
 public class WeatherForecast
 {
