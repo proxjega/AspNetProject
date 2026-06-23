@@ -60,8 +60,11 @@ namespace AspNetProject.Controllers
 
             currentUser.Name = user.Name;
             currentUser.Surname = user.Surname;
+            currentUser.DateOfBirth = user.DateOfBirth;
             currentUser.Gender = user.Gender;
             currentUser.Email = user.Email;
+            currentUser.Address = user.Address;
+            currentUser.UserNotes = user.UserNotes;
 
             try
             {
@@ -121,7 +124,10 @@ namespace AspNetProject.Controllers
                 Name = user.Name,
                 Surname = user.Surname,
                 Email = user.Email,
-                Gender = user.Gender
+                Gender = user.Gender,
+                DateOfBirth = user.DateOfBirth,
+                Address = user.Address,
+                UserNotes = user.UserNotes
             };
     }
 }
