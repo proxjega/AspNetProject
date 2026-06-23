@@ -485,3 +485,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+Data/
