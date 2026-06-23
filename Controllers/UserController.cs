@@ -46,9 +46,9 @@ namespace AspNetProject.Controllers
         // PUT: api/User/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser([FromRoute] long id, [FromBody] User user)
+        public async Task<IActionResult> PutUser([FromRoute] long id, [FromBody] UserDTO userDTO)
         {
-            if (id != user.Id)
+            if (id != userDTO.Id)
             {
                 return BadRequest();
             }
@@ -58,13 +58,13 @@ namespace AspNetProject.Controllers
                 return NotFound();
             }
 
-            currentUser.Name = user.Name;
-            currentUser.Surname = user.Surname;
-            currentUser.DateOfBirth = user.DateOfBirth;
-            currentUser.Gender = user.Gender;
-            currentUser.Email = user.Email;
-            currentUser.Address = user.Address;
-            currentUser.UserNotes = user.UserNotes;
+            currentUser.Name = userDTO.Name;
+            currentUser.Surname = userDTO.Surname;
+            currentUser.DateOfBirth = userDTO.DateOfBirth;
+            currentUser.Gender = userDTO.Gender;
+            currentUser.Email = userDTO.Email;
+            currentUser.Address = userDTO.Address;
+            currentUser.UserNotes = userDTO.UserNotes;
 
             try
             {
@@ -88,17 +88,18 @@ namespace AspNetProject.Controllers
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser([FromBody] User user)
-        {
+        public async Task<ActionResult<UserDTO>> PostUser([FromBody] UserDTO userDTO)
+        {   
+            var user = DTOToUser(userDTO);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = userDTO.Id }, userDTO);
         }
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(long id)
+        public async Task<IActionResult> DeleteUser([FromRoute] long id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -128,6 +129,19 @@ namespace AspNetProject.Controllers
                 DateOfBirth = user.DateOfBirth,
                 Address = user.Address,
                 UserNotes = user.UserNotes
+            };
+
+        private static User DTOToUser(UserDTO userDTO) =>
+            new User
+            {
+                Id = userDTO.Id,
+                Name = userDTO.Name,
+                Surname = userDTO.Surname,
+                Email = userDTO.Email,
+                Gender = userDTO.Gender,
+                DateOfBirth = userDTO.DateOfBirth,
+                Address = userDTO.Address,
+                UserNotes = userDTO.UserNotes
             };
     }
 }
