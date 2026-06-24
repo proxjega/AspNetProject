@@ -39,5 +39,5 @@ public class User
 
     public bool IsVerified {get; set; } = false;
 
-    public ICollection<Post>? Posts {get;}
+    public ICollection<Post> Posts { get; } = new List<Post>();
 }

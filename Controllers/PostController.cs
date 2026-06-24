@@ -22,14 +22,16 @@ namespace AspNetProject.Controllers
 
         // GET: api/Post
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
+        public async Task<ActionResult<IEnumerable<PostDTO>>> GetPosts()
         {
-            return await _context.Posts.ToListAsync();
+            return await _context.Posts
+            .Select(x => PostToDTO(x))
+            .ToListAsync();
         }
 
         // GET: api/Post/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(long id)
+        public async Task<ActionResult<PostDTO>> GetPost(long id)
         {
             var post = await _context.Posts.FindAsync(id);
 
@@ -38,20 +40,27 @@ namespace AspNetProject.Controllers
                 return NotFound();
             }
 
-            return post;
+            return PostToDTO(post);
         }
 
         // PUT: api/Post/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPost(long id, Post post)
-        {
-            if (id != post.Id)
+        public async Task<IActionResult> PutPost(long id, PostDTO postDTO)
+         {
+            if (id != postDTO.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(post).State = EntityState.Modified;
+            var currentPost = await _context.Posts.FindAsync(id);
+            if(currentPost == null) {
+                return NotFound();
+            }
+
+            currentPost.Id = postDTO.Id;
+            currentPost.Title = postDTO.Title;
+            currentPost.Content = postDTO.Content;
+            currentPost.UserId = postDTO.UserId;
 
             try
             {
@@ -73,14 +82,14 @@ namespace AspNetProject.Controllers
         }
 
         // POST: api/Post
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Post>> PostPost(Post post)
+        public async Task<ActionResult<PostDTO>> PostPost(PostDTO postDTO)
         {
+            var post = DTOToPost(postDTO);
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPost", new { id = post.Id }, post);
+            return CreatedAtAction(nameof(GetPost), new { id = postDTO.Id }, postDTO);
         }
 
         // DELETE: api/Post/5
@@ -103,5 +112,23 @@ namespace AspNetProject.Controllers
         {
             return _context.Posts.Any(e => e.Id == id);
         }
+
+        private static Post DTOToPost (PostDTO postDTO) => 
+            new Post
+            {
+                Id = postDTO.Id,
+                Title = postDTO.Title,
+                Content = postDTO.Content,
+                UserId = postDTO.UserId
+            };
+
+        private static PostDTO PostToDTO(Post post) =>
+            new PostDTO
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                UserId = post.UserId
+            };
     }
 }

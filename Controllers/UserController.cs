@@ -25,8 +25,8 @@ namespace AspNetProject.Controllers
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
             return await _context.Users
-        .Select(x => UserToDTO(x))
-        .ToListAsync();
+            .Select(x => UserToDTO(x))
+            .ToListAsync();
         }
 
         // GET: api/User/5

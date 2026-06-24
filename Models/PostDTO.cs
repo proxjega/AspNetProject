@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AspNetProject.Models;
 
-public class Post
+public class PostDTO
 {
     public long Id { get; set; }
 
@@ -13,5 +13,4 @@ public class Post
     public string? Content { get; set; }
 
     public long UserId { get; set; }
-    public User User { get; set;} = null!;
 }
