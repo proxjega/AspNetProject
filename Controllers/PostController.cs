@@ -83,8 +83,18 @@ namespace AspNetProject.Controllers
 
         // POST: api/Post
         [HttpPost]
-        public async Task<ActionResult<PostDTO>> PostPost(PostDTO postDTO)
+        public async Task<ActionResult<PostDTO>> PostPost([FromBody] PostDTO postDTO)
         {
+            var user = await _context.Users.FindAsync(postDTO.UserId);
+            if (user == null)
+            {
+                return NotFound("A user of this post does not exist!");
+            }
+            if (user.IsVerified != true)
+            {
+                return BadRequest("User that is not verified can not create posts!");
+            }
+            
             var post = DTOToPost(postDTO);
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
