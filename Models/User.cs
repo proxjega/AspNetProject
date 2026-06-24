@@ -36,5 +36,4 @@ public class User
     public List<string> UserNotes { get; set; } = new();
 
     public bool IsAdmin {get; set; } = false;
-
 }
