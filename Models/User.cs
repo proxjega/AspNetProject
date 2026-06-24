@@ -21,12 +21,13 @@ public class User
     [StringLength(30)]
     public string? Surname { get; set; }
 
-    [Required]
     public DateOnly DateOfBirth { get; set; }
 
     public GenderType? Gender { get; set; }
 
+    [Required]
     [EmailAddress]
+    [StringLength(100)]
     public string? Email { get; set; }
 
     [StringLength(100)]
