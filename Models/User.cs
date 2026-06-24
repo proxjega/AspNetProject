@@ -15,20 +15,20 @@ public class User
 
     [Required]
     [StringLength(30)]
-    public string? Name { get; set; }
+    public required string Name { get; set; }
 
     [Required]
     [StringLength(30)]
-    public string? Surname { get; set; }
+    public required string Surname { get; set; }
 
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
     public GenderType? Gender { get; set; }
 
     [Required]
     [EmailAddress]
     [StringLength(100)]
-    public string? Email { get; set; }
+    public required string Email { get; set; }
 
     [StringLength(100)]
     public string? Address { get; set; }
@@ -40,4 +40,7 @@ public class User
     public bool IsVerified {get; set; } = false;
 
     public ICollection<Post> Posts { get; } = new List<Post>();
+
+    public ICollection<Comment> Comments { get; } = new List<Comment>();
+
 }

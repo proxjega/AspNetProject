@@ -8,10 +8,12 @@ public class Post
 
     [Required]
     [StringLength(100)]
-    public string? Title { get; set; }
+    public required string Title { get; set; }
 
     public string? Content { get; set; }
 
     public long UserId { get; set; }
     public User User { get; set;} = null!;
+
+    public ICollection<Comment> Comments { get; } = new List<Comment>();
 }
