@@ -3,6 +3,9 @@ using AspNetProject.Models;
 using CsvHelper;
 using System.Globalization;
 using CsvHelper.Configuration;
+using System.Text.Json;
+using Xunit;
+using AspNetProject.Utilities;
 
 namespace AspNetProject.Controllers;
 
@@ -19,37 +22,55 @@ public class AverageBuildingAgeController : ControllerBase
             Delimiter = ";"
         };
         
-        Dictionary<string, double> averageAgesByStreet = new Dictionary<string, double>();
-        double average = 0;    
-        int counter = 0;    
-        
+        // parse csv
+        List<dynamic> records = new();
         try
         {
             using (var reader = new StreamReader(filename))
             using (var csv = new CsvReader(reader, config))
             {
-                var records = csv.GetRecords<dynamic>().ToList();
-                foreach (var record in records)
-                {
-                    if (record.build_year != null && record.build_year != "0" && record.build_year != "")
-                    {
-                        average += double.Parse(record.build_year);
-                        counter++;
-                    }
-                }
+                records = csv.GetRecords<dynamic>().ToList();
             }
             
         }
         catch (FileNotFoundException ex)
         {
             Console.WriteLine("File not found: " + ex.Message);
+            return StatusCode(500, new { error = "An error occurred. Please try again later." });
         }
         catch (IOException ex)
         {
             Console.WriteLine("IO error: " + ex.Message);
+            return StatusCode(500, new { error = "An error occurred. Please try again later." });
         }
-            
-        return Math.Round(average / counter, 2);
+
+        // put records into dictionary
+        Dictionary<string, (int counter, double yearSum)> averageAgesByStreet = new Dictionary<string, (int counter, double yearSum)>();
+        foreach (var record in records)
+        {
+            if (record.build_year != null && record.build_year != "0" && record.build_year != "")
+            {   
+                string street = AddressHelper.GetStreetName(record.adresas);
+                if (street == "") continue;
+                if (!averageAgesByStreet.ContainsKey(street))
+                {
+                    averageAgesByStreet.Add(street, (0, 0.0));
+                }
+                if (averageAgesByStreet.TryGetValue(street, out (int counter, double yearSum) current))
+                {
+                    averageAgesByStreet[street] = (current.counter + 1, current.yearSum + double.Parse(record.build_year));
+                }
+            }
+        }
+
+        // calculate average
+        SortedDictionary<string, double> result = new();
+        foreach (var street in averageAgesByStreet)
+        {
+            result[street.Key] = Math.Round(street.Value.yearSum / street.Value.counter, 2);
+        }
+
+        return Ok(result);
     }
 }
 
