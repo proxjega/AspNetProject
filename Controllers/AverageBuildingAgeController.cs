@@ -19,6 +19,7 @@ public class AverageBuildingAgeController : ControllerBase
             Delimiter = ";"
         };
         
+        Dictionary<string, double> averageAgesByStreet = new Dictionary<string, double>();
         double average = 0;    
         int counter = 0;    
         
@@ -51,3 +52,5 @@ public class AverageBuildingAgeController : ControllerBase
         return Math.Round(average / counter, 2);
     }
 }
+
+
