@@ -21,8 +21,8 @@ public class User
     [StringLength(30)]
     public string? Surname { get; set; }
 
-    [Range(1900, 9999)]
-    public int DateOfBirth { get; set; }
+    [Required]
+    public DateOnly DateOfBirth { get; set; }
 
     public GenderType? Gender { get; set; }
 
