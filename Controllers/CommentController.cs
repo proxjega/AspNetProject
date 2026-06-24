@@ -54,7 +54,19 @@ namespace AspNetProject.Controllers
 
             var currentComment = await _context.Comments.FindAsync(id);
             if(currentComment == null) {
-                return NotFound();
+                return NotFound("Comment not found");
+            }
+
+            var user = await _context.Users.FindAsync(commentDTO.UserId);
+            if (user == null)
+            {
+                return NotFound("User with this Id not found");
+            }
+            
+            var post = await _context.Posts.FindAsync(commentDTO.PostId);
+            if (post == null)
+            {
+                return NotFound("Post with this Id not found");
             }
 
             currentComment.Id = commentDTO.Id;

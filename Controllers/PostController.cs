@@ -57,6 +57,12 @@ namespace AspNetProject.Controllers
                 return NotFound();
             }
 
+            var user = await _context.Users.FindAsync(postDTO.UserId);
+            if (user == null)
+            {
+                return NotFound("User with this Id is not found");
+            }
+
             currentPost.Id = postDTO.Id;
             currentPost.Title = postDTO.Title;
             currentPost.Content = postDTO.Content;
