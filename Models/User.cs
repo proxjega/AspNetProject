@@ -38,4 +38,6 @@ public class User
     public bool IsAdmin {get; set; } = false;
 
     public bool IsVerified {get; set; } = false;
+
+    public ICollection<Post>? Posts {get;}
 }

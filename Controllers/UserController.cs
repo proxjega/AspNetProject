@@ -13,9 +13,9 @@ namespace AspNetProject.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserContext _context;
+        private readonly ApplicationContext _context;
 
-        public UserController(UserContext context)
+        public UserController(ApplicationContext context)
         {
             _context = context;
         }
