@@ -113,6 +113,24 @@ namespace AspNetProject.Controllers
             return NoContent();
         }
 
+        // POST: api/User/{id}/verify-email
+        [HttpPost("{id}/verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromRoute] long id, [FromBody] string token)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            if (token != "verify-me")
+            {
+                return BadRequest(new { message = "Invalid token" });
+            }
+
+            user.IsVerified = true;
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { message = "Email verified successfully" });
+        }
+
         private bool UserExists(long id)
         {
             return _context.Users.Any(e => e.Id == id);
