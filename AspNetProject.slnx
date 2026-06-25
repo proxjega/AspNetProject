@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AspNetProject/AspNetProject.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AspNetProject.Tests/AspNetProject.Tests.csproj" />
+  </Folder>
+</Solution>
