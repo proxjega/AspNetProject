@@ -1,6 +1,8 @@
 using Xunit;
 using AspNetProject.Utilities;
 
+namespace AspNetProject.Tests;
+
 public class AddressHelperTests
 {
     [Fact]
