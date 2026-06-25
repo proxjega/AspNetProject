@@ -9,7 +9,7 @@ using AspNetProject.Models;
 
 namespace AspNetProject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/comments")]
     [ApiController]
     public class CommentController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace AspNetProject.Controllers
             _context = context;
         }
 
-        // GET: api/Comment
+        // GET: api/comments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
         {
@@ -29,7 +29,7 @@ namespace AspNetProject.Controllers
             .ToListAsync();
         }
 
-        // GET: api/Comment/5
+        // GET: api/comments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CommentDTO>> GetComment(long id)
         {
@@ -43,7 +43,7 @@ namespace AspNetProject.Controllers
             return CommentToDTO(comment);
         }
 
-        // PUT: api/Comment/5
+        // PUT: api/comments/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutComment(long id, CommentDTO commentDTO)
          {
@@ -93,7 +93,7 @@ namespace AspNetProject.Controllers
             return NoContent();
         }
 
-        // POST: api/Comment
+        // POST: api/comments
         [HttpPost]
         public async Task<ActionResult<CommentDTO>> PostComment([FromBody] CommentDTO commentDTO)
         {
@@ -120,7 +120,7 @@ namespace AspNetProject.Controllers
             return CreatedAtAction(nameof(GetComment), new { id = commentDTO.Id }, commentDTO);
         }
 
-        // DELETE: api/Comment/5
+        // DELETE: api/comments/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(long id)
         {

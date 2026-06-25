@@ -9,7 +9,7 @@ using AspNetProject.Models;
 
 namespace AspNetProject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/posts")]
     [ApiController]
     public class PostController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace AspNetProject.Controllers
             _context = context;
         }
 
-        // GET: api/Post
+        // GET: api/posts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PostDTO>>> GetPosts()
         {
@@ -29,7 +29,7 @@ namespace AspNetProject.Controllers
             .ToListAsync();
         }
 
-        // GET: api/Post/5
+        // GET: api/posts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PostDTO>> GetPost(long id)
         {
@@ -43,7 +43,7 @@ namespace AspNetProject.Controllers
             return PostToDTO(post);
         }
 
-        // PUT: api/Post/5
+        // PUT: api/posts/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(long id, PostDTO postDTO)
          {
@@ -57,8 +57,8 @@ namespace AspNetProject.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(postDTO.UserId);
-            if (user == null)
+            var user = await _context.Users.AnyAsync(u => u.Id == postDTO.UserId);
+            if (!user)
             {
                 return NotFound("User with this Id is not found");
             }
@@ -87,7 +87,7 @@ namespace AspNetProject.Controllers
             return NoContent();
         }
 
-        // POST: api/Post
+        // POST: api/posts
         [HttpPost]
         public async Task<ActionResult<PostDTO>> PostPost([FromBody] PostDTO postDTO)
         {
@@ -108,7 +108,7 @@ namespace AspNetProject.Controllers
             return CreatedAtAction(nameof(GetPost), new { id = postDTO.Id }, postDTO);
         }
 
-        // DELETE: api/Post/5
+        // DELETE: api/posts/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
@@ -122,6 +122,24 @@ namespace AspNetProject.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // GET: /api/users/5/posts
+        [HttpGet("/api/users/{userId}/posts")]
+        public async Task<ActionResult<IEnumerable<PostDTO>>> GetPostsFromUser([FromRoute] long userId)
+        {   
+            var user = await _context.Users.AnyAsync(u => u.Id == userId);
+            if (!user)
+            {   
+                return NotFound("User with this id not found");
+            }
+
+            var posts = await _context.Posts
+                .Where(p => p.UserId == userId)
+                .Select(p => PostToDTO(p))
+                .ToListAsync();
+
+            return Ok(posts);
         }
 
         private bool PostExists(long id)

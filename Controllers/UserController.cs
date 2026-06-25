@@ -9,7 +9,7 @@ using AspNetProject.Models;
 
 namespace AspNetProject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace AspNetProject.Controllers
             _context = context;
         }
 
-        // GET: api/User
+        // GET: api/users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
@@ -29,7 +29,7 @@ namespace AspNetProject.Controllers
             .ToListAsync();
         }
 
-        // GET: api/User/5
+        // GET: api/users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser([FromRoute] long id)
         {
@@ -43,7 +43,7 @@ namespace AspNetProject.Controllers
             return UserToDTO(user);
         }
 
-        // PUT: api/User/5
+        // PUT: api/users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser([FromRoute] long id, [FromBody] UserDTO userDTO)
@@ -85,7 +85,7 @@ namespace AspNetProject.Controllers
             return NoContent();
         }
 
-        // POST: api/User
+        // POST: api/users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<UserDTO>> PostUser([FromBody] UserDTO userDTO)
@@ -97,7 +97,7 @@ namespace AspNetProject.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = userDTO.Id }, userDTO);
         }
 
-        // DELETE: api/User/5
+        // DELETE: api/users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] long id)
         {
@@ -113,7 +113,7 @@ namespace AspNetProject.Controllers
             return NoContent();
         }
 
-        // POST: api/User/{id}/verify-email
+        // POST: api/users/{id}/verify-email
         [HttpPost("{id}/verify-email")]
         public async Task<IActionResult> VerifyEmail([FromRoute] long id, [FromBody] string token)
         {
