@@ -2,29 +2,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AspNetProject.Models;
 
-public class UserDTO
+public record UserDTO
 { 
-    public long Id { get; set; }
+    public long Id { get; init; }
 
     [Required]
     [StringLength(30)]
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
     [Required]
     [StringLength(30)]
-    public required string Surname { get; set; }
+    public required string Surname { get; init; }
 
-    public DateOnly? DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; init; }
 
-    public GenderType? Gender { get; set; }
+    public GenderType? Gender { get; init; }
 
     [Required]
     [EmailAddress]
     [StringLength(100)]
-    public required string Email { get; set; }
+    public required string Email { get; init; }
 
     [StringLength(100)]
-    public string? Address { get; set; }
+    public string? Address { get; init; }
 
-    public List<string> UserNotes { get; set; } = new();
+    public List<string> UserNotes { get; init; } = new();
 }
