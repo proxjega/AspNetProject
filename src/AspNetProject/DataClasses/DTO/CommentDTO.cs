@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AspNetProject.Models;
+namespace AspNetProject.DTOs;
 
-public class CommentDTO
+public record CommentDTO
 {
     public long Id { get; init; }
 

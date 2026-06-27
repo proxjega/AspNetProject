@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using AspNetProject.Models;
 
-namespace AspNetProject.Models;
+namespace AspNetProject.DTOs;
+
 
 public record UserDTO
 { 

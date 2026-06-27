@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AspNetProject.Models;
+namespace AspNetProject.DTOs;
 
 public record PostDTO
 {
