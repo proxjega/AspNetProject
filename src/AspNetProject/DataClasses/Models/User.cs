@@ -14,6 +14,14 @@ public class User
     public long Id { get; set; }
 
     [Required]
+    [EmailAddress]
+    [StringLength(100)]
+    public required string Email { get; set; }
+
+    [Required]
+    public required string PasswordHash { get; set; }
+
+    [Required]
     [StringLength(30)]
     public required string Name { get; set; }
 
@@ -24,11 +32,6 @@ public class User
     public DateOnly? DateOfBirth { get; set; }
 
     public GenderType? Gender { get; set; }
-
-    [Required]
-    [EmailAddress]
-    [StringLength(100)]
-    public required string Email { get; set; }
 
     [StringLength(100)]
     public string? Address { get; set; }

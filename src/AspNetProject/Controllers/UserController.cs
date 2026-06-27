@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using AspNetProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using AspNetProject.DTOs;
+using System.Security.Claims;
 
 namespace AspNetProject.Controllers;
 
@@ -20,6 +21,7 @@ public class UserController : ControllerBase
 
     // GET: api/users
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
     {
         return await _context.Users
@@ -29,6 +31,7 @@ public class UserController : ControllerBase
 
     // GET: api/users/5
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> GetUser([FromRoute] long id)
     {
         var user = await _context.Users.FindAsync(id);
@@ -44,6 +47,7 @@ public class UserController : ControllerBase
     // PUT: api/users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutUser([FromRoute] long id, [FromBody] UserDTO userDTO)
     {
         if (id != userDTO.Id)
@@ -85,10 +89,10 @@ public class UserController : ControllerBase
 
     // POST: api/users
     [HttpPost]
-    [AllowAnonymous]
-    public async Task<ActionResult<UserDTO>> PostUser([FromBody] UserDTO userDTO)
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<UserDTO>> PostUser([FromBody] UserDTO userDTO, string passwordHash)
     {   
-        var user = DTOToUser(userDTO);
+        var user = DTOToUser(userDTO, passwordHash);
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
@@ -97,6 +101,7 @@ public class UserController : ControllerBase
 
     // DELETE: api/users/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser([FromRoute] long id)
     {
         var user = await _context.Users.FindAsync(id);
@@ -109,6 +114,17 @@ public class UserController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {   
+        
+        var userId = long.Parse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var user = await _context.Users.FindAsync(userId);
+
+        return Ok(UserToDTO(user!));
     }
 
     // POST: api/users/{id}/verify-email
@@ -134,7 +150,7 @@ public class UserController : ControllerBase
         return _context.Users.Any(e => e.Id == id);
     }
 
-    private static UserDTO UserToDTO(User user) =>
+    public static UserDTO UserToDTO(User user) =>
         new UserDTO
         {
             Id = user.Id,
@@ -147,12 +163,13 @@ public class UserController : ControllerBase
             UserNotes = user.UserNotes
         };
 
-    private static User DTOToUser(UserDTO userDTO) =>
+    public static User DTOToUser(UserDTO userDTO, string passwordHash) =>
         new User
         {
             Id = userDTO.Id,
             Name = userDTO.Name,
             Surname = userDTO.Surname,
+            PasswordHash = passwordHash,
             Email = userDTO.Email,
             Gender = userDTO.Gender,
             DateOfBirth = userDTO.DateOfBirth,
