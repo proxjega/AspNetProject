@@ -1,13 +1,17 @@
+using AspNetProject.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace AspNetProject.Services;
 
 public class DraftCleanerService : BackgroundService
 {
     private readonly ILogger<DraftCleanerService> _logger;
-    private int _executionCount;
+    private readonly IServiceScopeFactory _serviceFactory;
 
-    public DraftCleanerService(ILogger<DraftCleanerService> logger)
+    public DraftCleanerService(ILogger<DraftCleanerService> logger, IServiceScopeFactory serviceFactory)
     {
         _logger = logger;
+        _serviceFactory = serviceFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,11 +38,17 @@ public class DraftCleanerService : BackgroundService
 
     private async Task DoWork()
     {
-        int count = Interlocked.Increment(ref _executionCount);
 
-        // Simulate work
-        await Task.Delay(TimeSpan.FromSeconds(2));
+        using var scope = _serviceFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-        _logger.LogInformation("DraftCleanerService cleaning... Count: {Count}", count);
+        var cutoff = DateTime.UtcNow.AddDays(-1);
+
+        int deleted = await db.Posts
+            .Where(x => x.IsDraft && x.CreatedAt < cutoff)
+            .ExecuteDeleteAsync();
+        await db.SaveChangesAsync();
+
+        _logger.LogInformation($"DraftCleanerService cleaned {deleted} Posts...");
     }
 }
