@@ -18,8 +18,7 @@ public class DraftCleanerService : BackgroundService
     {
         _logger.LogInformation("DraftCleanerService starting...");
 
-        // When the timer should have no due-time, then do the work once now.
-        await DoWork();
+        await DoWork(stoppingToken);
 
         using PeriodicTimer timer = new(TimeSpan.FromSeconds(30));
 
@@ -27,7 +26,7 @@ public class DraftCleanerService : BackgroundService
         {
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                await DoWork();
+                await DoWork(stoppingToken);
             }
         }
         catch (OperationCanceledException)
@@ -36,7 +35,7 @@ public class DraftCleanerService : BackgroundService
         }
     }
 
-    private async Task DoWork()
+    private async Task DoWork(CancellationToken stoppingToken)
     {
 
         using var scope = _serviceFactory.CreateScope();
@@ -46,9 +45,8 @@ public class DraftCleanerService : BackgroundService
 
         int deleted = await db.Posts
             .Where(x => x.IsDraft && x.CreatedAt < cutoff)
-            .ExecuteDeleteAsync();
-        await db.SaveChangesAsync();
+            .ExecuteDeleteAsync(stoppingToken);
 
-        _logger.LogInformation($"DraftCleanerService cleaned {deleted} Posts...");
+        _logger.LogInformation("DraftCleanerService cleaned {DeletedCount} Posts...", deleted);
     }
 }
