@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using AspNetProject.Models;
+using AspNetProject.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddDbContext<ApplicationContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
+builder.Services.AddHostedService<DraftCleanerService>();
 
 var app = builder.Build();
 
