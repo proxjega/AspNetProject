@@ -13,4 +13,7 @@ public record PostDTO
     public string? Content { get; init; }
 
     public long UserId { get; init; }
+
+    public DateTime CreatedAt {get; init;}
+    public bool IsDraft {get; init; }
 }

@@ -43,10 +43,6 @@ public class PostController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPost(long id, PostDTO postDTO)
         {
-        if (id != postDTO.Id)
-        {
-            return BadRequest();
-        }
 
         var currentPost = await _context.Posts.FindAsync(id);
         if(currentPost == null) {
@@ -59,10 +55,10 @@ public class PostController : ControllerBase
             return NotFound("User with this Id is not found");
         }
 
-        currentPost.Id = postDTO.Id;
         currentPost.Title = postDTO.Title;
         currentPost.Content = postDTO.Content;
         currentPost.UserId = postDTO.UserId;
+        currentPost.IsDraft = postDTO.IsDraft;
 
         try
         {
@@ -101,7 +97,7 @@ public class PostController : ControllerBase
         _context.Posts.Add(post);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetPost), new { id = postDTO.Id }, postDTO);
+        return CreatedAtAction(nameof(GetPost), new { id = post.Id }, postDTO);
     }
 
     // DELETE: api/posts/5
@@ -149,7 +145,9 @@ public class PostController : ControllerBase
             Id = postDTO.Id,
             Title = postDTO.Title,
             Content = postDTO.Content,
-            UserId = postDTO.UserId
+            UserId = postDTO.UserId,
+            IsDraft = postDTO.IsDraft,
+            CreatedAt = postDTO.CreatedAt
         };
 
     private static PostDTO PostToDTO(Post post) =>
@@ -158,6 +156,8 @@ public class PostController : ControllerBase
             Id = post.Id,
             Title = post.Title,
             Content = post.Content,
-            UserId = post.UserId
+            UserId = post.UserId,
+            IsDraft = post.IsDraft,
+            CreatedAt = post.CreatedAt
         };
 }
