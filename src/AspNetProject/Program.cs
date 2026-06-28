@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using AspNetProject.Models;
 using AspNetProject.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using AspNetProject.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseExceptionHandlingMiddleware();
 
 app.UseAuthentication();
 app.UseAuthorization();

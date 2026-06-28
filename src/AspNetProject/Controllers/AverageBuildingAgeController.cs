@@ -69,6 +69,13 @@ public class AverageBuildingAgeController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost]
+    public async Task<ActionResult> PostException()
+    {
+        throw new Exception("Exception");
+        return Ok();
+    }
 }
 
 
