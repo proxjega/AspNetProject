@@ -4,7 +4,7 @@ using AspNetProject.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AspNetProject.Middleware;
 using Hangfire;
-using Hangfire.AspNetCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +23,11 @@ builder.Services.AddHangfire(configuration => configuration
         .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<DraftCleanerService>();
+
+// redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
+builder.Services.AddHttpClient();
+
 
 var app = builder.Build();
 

@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AspNetProject.Models;
 using AspNetProject.DTOs;
+using StackExchange.Redis;
+using System.Text.Json;
+using System.Diagnostics;
 
 namespace AspNetProject.Controllers;
 
@@ -10,19 +13,47 @@ namespace AspNetProject.Controllers;
 public class PostController : ControllerBase
 {
     private readonly ApplicationContext _context;
+    private readonly HttpClient _client;
+    private readonly IDatabase _redis;
+    private readonly ILogger _logger;
 
-    public PostController(ApplicationContext context)
+    public PostController(ApplicationContext context, HttpClient client, IConnectionMultiplexer muxer, ILogger<PostController> logger)
     {
         _context = context;
+        _client = client;
+        _redis = muxer.GetDatabase();
+        _logger = logger;
     }
 
     // GET: api/posts
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PostDTO>>> GetPosts()
+    public async Task<ActionResult<PostWithRedisDTO>> GetPosts()
     {
-        return await _context.Posts
-        .Select(x => PostToDTO(x))
-        .ToListAsync();
+        var watch = Stopwatch.StartNew();
+
+        var keyName = "posts";
+        var json = await _redis.StringGetAsync(keyName);
+        if (string.IsNullOrEmpty(json))
+        {
+            _logger.LogInformation("PostController: cache miss!");
+            var posts = await _context.Posts
+            .Select(x => PostToDTO(x))
+            .ToListAsync();
+            json = JsonSerializer.Serialize(posts);
+            var setTask = _redis.StringSetAsync(keyName, json);
+            var expireTask = _redis.KeyExpireAsync(keyName, TimeSpan.FromSeconds(3600));
+            await Task.WhenAll(setTask, expireTask);
+        }
+        else
+        {
+            _logger.LogInformation("PostController: cache hit!");
+        }
+
+        watch.Stop();
+        var postsResult = JsonSerializer.Deserialize<IEnumerable<PostDTO>>(json.ToString());
+        var result = new PostWithRedisDTO(postsResult, watch.ElapsedMilliseconds);
+        return Ok(result);
+        
     }
 
     // GET: api/posts/5
