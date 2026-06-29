@@ -3,47 +3,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspNetProject.Services;
 
-public class DraftCleanerService : BackgroundService
+public class DraftCleanerService
 {
     private readonly ILogger<DraftCleanerService> _logger;
-    private readonly IServiceScopeFactory _serviceFactory;
+    private readonly ApplicationContext _db;
 
-    public DraftCleanerService(ILogger<DraftCleanerService> logger, IServiceScopeFactory serviceFactory)
+    public DraftCleanerService(ILogger<DraftCleanerService> logger, ApplicationContext db)
     {
         _logger = logger;
-        _serviceFactory = serviceFactory;
+        _db = db;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    // protected async Task ExecuteAsync(CancellationToken stoppingToken)
+    // {
+    //     _logger.LogInformation("DraftCleanerService starting...");
+
+    //     await DoWork(stoppingToken);
+
+    //     using PeriodicTimer timer = new(TimeSpan.FromSeconds(30));
+
+    //     try
+    //     {
+    //         while (await timer.WaitForNextTickAsync(stoppingToken))
+    //         {
+    //             await DoWork(stoppingToken);
+    //         }
+    //     }
+    //     catch (OperationCanceledException)
+    //     {
+    //         _logger.LogInformation("DraftCleanerService is stopping.");
+    //     }
+    // }
+
+    public async Task Execute(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("DraftCleanerService starting...");
-
-        await DoWork(stoppingToken);
-
-        using PeriodicTimer timer = new(TimeSpan.FromSeconds(30));
-
-        try
-        {
-            while (await timer.WaitForNextTickAsync(stoppingToken))
-            {
-                await DoWork(stoppingToken);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("DraftCleanerService is stopping.");
-        }
-    }
-
-    private async Task DoWork(CancellationToken stoppingToken)
-    {
-
-        using var scope = _serviceFactory.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
         var cutoff = DateTime.UtcNow.AddDays(-1);
 
-        int deleted = await db.Posts
+        int deleted = await _db.Posts
             .Where(x => x.IsDraft && x.CreatedAt < cutoff)
             .ExecuteDeleteAsync(stoppingToken);
 
