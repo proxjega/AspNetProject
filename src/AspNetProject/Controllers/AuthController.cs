@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using AspNetProject.Services;
 
 namespace AspNetProject.Controllers;
 
@@ -15,10 +16,12 @@ namespace AspNetProject.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly ApplicationContext _context;
+    private readonly UserService _userService;
 
-    public AuthController(ApplicationContext context)
+    public AuthController(ApplicationContext context, UserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     [HttpPost("register")]
@@ -29,25 +32,12 @@ public class AuthController : ControllerBase
 
         if (exists) return BadRequest("User with this email already exists");
 
-        var user = new User
-        {
-            Email = registerDTO.Email,
-            Name = registerDTO.Name,
-            Surname = registerDTO.Surname,
-            PasswordHash = ""
-        };
-
-        var hasher = new PasswordHasher<User>();
-        var hashedPassword = hasher.HashPassword(user, registerDTO.password);
-        user.PasswordHash = hashedPassword;
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        var userDTO = await _userService.CreateUserAsync(registerDTO);
 
         return CreatedAtAction(
             nameof(Register),
-            new { id = user.Id },
-            UserController.UserToDTO(user));
+            new { id = userDTO.Id },
+            userDTO);
     }
 
     [HttpPost("login")]

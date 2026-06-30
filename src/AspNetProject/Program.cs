@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using AspNetProject.Middleware;
 using Hangfire;
 using StackExchange.Redis;
+using RabbitMQ.Client;
+using System.Configuration;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,10 +31,13 @@ builder.Services.AddScoped<DraftCleanerService>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
 builder.Services.AddHttpClient();
 
+//rabbitmq
+builder.Services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
+builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
+
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -41,6 +47,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseExceptionHandlingMiddleware();
 
 app.UseAuthentication();
@@ -51,7 +58,7 @@ app.UseHangfireDashboard();
 RecurringJob.AddOrUpdate<DraftCleanerService>(
     "draft-cleaner",
     job => job.Execute(CancellationToken.None),
-    "*/30 * * * * *");
+    "* */30 * * * *");
 
 app.MapControllers();
 
