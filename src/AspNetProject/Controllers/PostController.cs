@@ -5,6 +5,9 @@ using AspNetProject.DTOs;
 using StackExchange.Redis;
 using System.Text.Json;
 using System.Diagnostics;
+using AspNetProject.Services;
+using System.Xml;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace AspNetProject.Controllers;
 
@@ -16,13 +19,15 @@ public class PostController : ControllerBase
     private readonly HttpClient _client;
     private readonly IDatabase _redis;
     private readonly ILogger _logger;
+    private readonly PostService _service;
 
-    public PostController(ApplicationContext context, HttpClient client, IConnectionMultiplexer muxer, ILogger<PostController> logger)
+    public PostController(ApplicationContext context, HttpClient client, IConnectionMultiplexer muxer, ILogger<PostController> logger, PostService service)
     {
         _context = context;
         _client = client;
         _redis = muxer.GetDatabase();
         _logger = logger;
+        _service = service;
     }
 
     // GET: api/posts
@@ -41,7 +46,7 @@ public class PostController : ControllerBase
             .ToListAsync();
             json = JsonSerializer.Serialize(posts);
             var setTask = _redis.StringSetAsync(keyName, json);
-            var expireTask = _redis.KeyExpireAsync(keyName, TimeSpan.FromSeconds(3600));
+            var expireTask = _redis.KeyExpireAsync(keyName, TimeSpan.FromSeconds(10));
             await Task.WhenAll(setTask, expireTask);
         }
         else
@@ -131,6 +136,22 @@ public class PostController : ControllerBase
         return CreatedAtAction(nameof(GetPost), new { id = post.Id }, postDTO);
     }
 
+    [HttpPost("withComment")]
+    public async Task<ActionResult<PostWithCommentDTO>> PostPost2([FromBody] PostWithCommentDTO dto)
+    {   
+        PostWithCommentDTO result;
+        try
+        {
+            result = await _service.CreatePostWithComment(dto);
+        }
+        catch (DbUpdateException e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        return CreatedAtAction(nameof(GetPost), new { id = result.PostDTO.Id }, result);
+    }
+
     // DELETE: api/posts/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePost(long id)
@@ -170,7 +191,7 @@ public class PostController : ControllerBase
         return _context.Posts.Any(e => e.Id == id);
     }
 
-    private static Post DTOToPost (PostDTO postDTO) => 
+    public static Post DTOToPost (PostDTO postDTO) => 
         new Post
         {
             Id = postDTO.Id,
@@ -181,7 +202,7 @@ public class PostController : ControllerBase
             CreatedAt = postDTO.CreatedAt
         };
 
-    private static PostDTO PostToDTO(Post post) =>
+    public static PostDTO PostToDTO(Post post) =>
         new PostDTO
         {
             Id = post.Id,

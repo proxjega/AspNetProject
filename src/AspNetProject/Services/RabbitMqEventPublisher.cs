@@ -12,11 +12,13 @@ public interface IEventPublisher
 public class RabbitMqEventPublisher : IEventPublisher
 {
     private readonly IRabbitMqConnection _connection;
+    private readonly ILogger _logger;
     private const string ExchangeName = "app.events";
 
-    public RabbitMqEventPublisher(IRabbitMqConnection connection)
+    public RabbitMqEventPublisher(IRabbitMqConnection connection, ILogger<RabbitMqEventPublisher> logger)
     {
         _connection = connection;
+        _logger = logger;
     }
 
     public async Task PublishAsync<TEvent>(TEvent @event, string routingKey, CancellationToken cancellationToken = default)
@@ -46,5 +48,6 @@ public class RabbitMqEventPublisher : IEventPublisher
             basicProperties: props,
             body: body,
             cancellationToken: cancellationToken);
+        _logger.LogInformation("Event {routingKey} published", routingKey);
     }
 }

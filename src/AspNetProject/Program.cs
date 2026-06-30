@@ -34,7 +34,9 @@ builder.Services.AddHttpClient();
 //rabbitmq
 builder.Services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
 builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
+builder.Services.AddHostedService<EmailService>();
 
+builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();

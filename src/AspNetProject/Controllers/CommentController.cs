@@ -137,7 +137,7 @@ public class CommentController : ControllerBase
         return _context.Comments.Any(e => e.Id == id);
     }
 
-    private static Comment DTOToComment (CommentDTO commentDTO) => 
+    public static Comment DTOToComment (CommentDTO commentDTO) => 
         new Comment
         {
             Id = commentDTO.Id,
@@ -146,7 +146,7 @@ public class CommentController : ControllerBase
             PostId = commentDTO.PostId
         };
 
-    private static CommentDTO CommentToDTO(Comment comment) =>
+    public static CommentDTO CommentToDTO(Comment comment) =>
         new CommentDTO
         {
             Id = comment.Id,
